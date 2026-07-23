@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AvailabilityService {
@@ -16,11 +17,19 @@ public class AvailabilityService {
     }
     
     public List<Availability> getSlotsByDate(LocalDate date){
-        return availabilityRepository.findByDate(date);
+         return availabilityRepository.findByDateAndBookedFalse(date);
     }
 
     public Availability addSlot(Availability availability) {
         return availabilityRepository.save(availability);
+    }
+
+    public Optional<Availability> getSlot(LocalDate date, LocalTime time, String sessionType) {
+        return availabilityRepository.findByDateAndTimeAndSessionType(date, time, sessionType);
+    
+    }
+    public Availability save(Availability availability) {
+          return availabilityRepository.save(availability);
     }
 
     public void markAsBooked(LocalDate date, LocalTime time, String sessionType) {

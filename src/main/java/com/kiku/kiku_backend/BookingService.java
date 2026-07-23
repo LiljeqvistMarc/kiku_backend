@@ -36,18 +36,22 @@ public class BookingService {
     }
 
     public Booking createBooking(Booking booking) {
-        Booking saved = bookingRepository.save(booking);
+    Availability availability = availabilityService
+            .getSlot(booking.getDate(), booking.getTime(), booking.getSessionType())
+            .orElseThrow(() -> new RuntimeException("Slot not found"));
 
-        User user = userService.findOrCreateUser(saved.getEmail());
-        saved.setUser(user);
-        bookingRepository.save(saved);
+    if (availability.isBooked()) {
+        throw new RuntimeException("This slot is already booked");
+    }
 
-        try {
-            availabilityService.markAsBooked(saved.getDate(), saved.getTime(), saved.getSessionType());
-        } catch (Exception e) {
-            System.out.println("Could not mark slot as booked: " + e.getMessage());
-        }
+    availability.setBooked(true);
+    availabilityService.save(availability); // or availabilityRepository.save directly
 
+    Booking saved = bookingRepository.save(booking);
+
+    User user = userService.findOrCreateUser(saved.getEmail());
+    saved.setUser(user);
+    bookingRepository.save(saved);
         if ("intro".equals(saved.getSessionType())) {
             saved.setStatus("CONFIRMED");
             try {
