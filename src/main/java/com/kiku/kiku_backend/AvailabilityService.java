@@ -1,5 +1,7 @@
 package com.kiku.kiku_backend;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -75,5 +77,10 @@ public List<Availability> addBulkSlots(BulkAvailabilityRequest request) {
     }
 
     return availabilityRepository.saveAll(slots);
+}
+@Scheduled(cron = "0 0 3 * * *", zone = "Asia/Tokyo")
+@Transactional
+public void cleanupPastSlots() {
+    availabilityRepository.deleteByDateBefore(LocalDate.now(java.time.ZoneId.of("Asia/Tokyo")));
 }
 }
