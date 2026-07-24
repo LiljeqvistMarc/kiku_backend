@@ -45,16 +45,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/api/admin/login").permitAll()
-            .requestMatchers("/api/bookings/**").permitAll()
-            .requestMatchers("/api/webhooks/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/availability").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/availability/**").hasRole("ADMIN")
-            .requestMatchers(HttpMethod.DELETE, "/api/availability/**").hasRole("ADMIN")
-            .anyRequest().authenticated()
-)
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/admin/login").permitAll()
+                .requestMatchers("/api/bookings/**").permitAll()
+                .requestMatchers("/api/webhooks/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/availability/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/availability/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
