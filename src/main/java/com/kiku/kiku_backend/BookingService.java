@@ -35,18 +35,23 @@ public class BookingService {
         this.googleCalendarService = googleCalendarService;
     }
 
-    public Booking createBooking(Booking booking) {
+public Booking createBooking(Booking booking) {
+        Availability availability = availabilityService
+                .getSlot(booking.getDate(), booking.getTime(), booking.getSessionType())
+                .orElseThrow(() -> new RuntimeException("Slot not found"));
+
+        if (availability.isBooked()) {
+            throw new RuntimeException("This slot is already booked");
+        }
+
+        availability.setBooked(true);
+        availabilityService.save(availability);
+
         Booking saved = bookingRepository.save(booking);
 
         User user = userService.findOrCreateUser(saved.getEmail());
         saved.setUser(user);
         bookingRepository.save(saved);
-
-        try {
-            availabilityService.markAsBooked(saved.getDate(), saved.getTime(), saved.getSessionType());
-        } catch (Exception e) {
-            System.out.println("Could not mark slot as booked: " + e.getMessage());
-        }
 
         if ("intro".equals(saved.getSessionType())) {
             saved.setStatus("CONFIRMED");
