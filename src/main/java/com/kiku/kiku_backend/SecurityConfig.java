@@ -45,13 +45,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/error").permitAll() // <--- Fix 1: Allows Spring Boot error dispatching
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/admin/login").permitAll()
                 .requestMatchers("/api/bookings/**").permitAll()
                 .requestMatchers("/api/webhooks/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/availability/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/availability/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/availability", "/api/availability/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/availability", "/api/availability/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/availability", "/api/availability/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
