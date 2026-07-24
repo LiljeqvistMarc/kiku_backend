@@ -27,5 +27,6 @@ public class Availability {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
 
-    private boolean isBooked;
+    @Column(name = "is_booked")
+    private boolean booked;
 }
