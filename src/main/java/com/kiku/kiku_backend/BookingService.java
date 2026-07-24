@@ -36,8 +36,10 @@ public class BookingService {
     }
 
 public Booking createBooking(Booking booking) {
+    String slotType = "intro".equals(booking.getSessionType()) ? "standard" : booking.getSessionType();
+
         Availability availability = availabilityService
-                .getSlot(booking.getDate(), booking.getTime(), booking.getSessionType())
+                .getSlot(booking.getDate(), booking.getTime(), slotType)
                 .orElseThrow(() -> new RuntimeException("Slot not found"));
 
         if (availability.isBooked()) {
@@ -93,27 +95,29 @@ public Booking createBooking(Booking booking) {
         return saved;
     }
 
-    public void cancelBooking(UUID id) throws StripeException {
-        Booking booking = getBooking(id);
+public void cancelBooking(UUID id) throws StripeException {
+    Booking booking = getBooking(id);
 
-        LocalDateTime sessionDateTime = LocalDateTime.of(booking.getDate(), booking.getTime());
-        LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo"));
-        long hoursUntilSession = Duration.between(now, sessionDateTime).toHours();
+    LocalDateTime sessionDateTime = LocalDateTime.of(booking.getDate(), booking.getTime());
+    LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Tokyo"));
+    long hoursUntilSession = Duration.between(now, sessionDateTime).toHours();
 
-        if ("PAID".equals(booking.getStatus())
-                && booking.getStripePaymentIntentId() != null
-                && hoursUntilSession > 24) {
-            Stripe.apiKey = stripeApiKey;
-            Refund.create(RefundCreateParams.builder()
-                    .setPaymentIntent(booking.getStripePaymentIntentId())
-                    .build());
-        }
+    if ("PAID".equals(booking.getStatus())
+            && booking.getStripePaymentIntentId() != null
+            && hoursUntilSession > 24) {
+        Stripe.apiKey = stripeApiKey;
+        Refund.create(RefundCreateParams.builder()
+                .setPaymentIntent(booking.getStripePaymentIntentId())
+                .build());
+    }
 
-        try {
-            availabilityService.markAsUnBooked(booking.getDate(), booking.getTime(), booking.getSessionType());
-        } catch (Exception e) {
-            System.out.println("Could not unbook slot: " + e.getMessage());
-        }
+    String slotType = "intro".equals(booking.getSessionType()) ? "standard" : booking.getSessionType();
+
+    try {
+        availabilityService.markAsUnBooked(booking.getDate(), booking.getTime(), slotType);
+    } catch (Exception e) {
+        System.out.println("Could not unbook slot: " + e.getMessage());
+    }
 
         try {
             emailService.sendCancellationEmail(
