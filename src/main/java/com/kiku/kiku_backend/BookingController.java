@@ -67,8 +67,9 @@ public ResponseEntity<Booking> updateBooking(@PathVariable UUID id, @RequestBody
     return bookingRepository.findById(id)
         .map(booking -> {
             // unbook old slot
+            String oldSlotType = "intro".equals(booking.getSessionType()) ? "standard" : booking.getSessionType();
             try {
-                availabilityService.markAsUnBooked(booking.getDate(), booking.getTime(), booking.getSessionType());
+                availabilityService.markAsUnBooked(booking.getDate(), booking.getTime(), oldSlotType);
             } catch (Exception e) {
                 System.out.println("Could not unbook old slot: " + e.getMessage());
             }
@@ -79,8 +80,9 @@ public ResponseEntity<Booking> updateBooking(@PathVariable UUID id, @RequestBody
             booking.setSessionType(newBooking.getSessionType());
 
             // book new slot
+            String newSlotType = "intro".equals(booking.getSessionType()) ? "standard" : booking.getSessionType();
             try {
-                availabilityService.markAsBooked(booking.getDate(), booking.getTime(), booking.getSessionType());
+                availabilityService.markAsBooked(booking.getDate(), booking.getTime(), newSlotType);
             } catch (Exception e) {
                 System.out.println("Could not book new slot: " + e.getMessage());
             }
