@@ -12,6 +12,5 @@ import java.time.LocalTime;
 public interface AvailabilityRepository extends JpaRepository<Availability, UUID> {
     List<Availability> findByDate(LocalDate date);
     List<Availability> findByDateAndSessionType(LocalDate date, String sessionType);
-    List<Availability> findByDateAndBookedFalse(LocalDate date);
     Optional<Availability> findByDateAndTimeAndSessionType(LocalDate date, LocalTime time, String sessionType);
 }
